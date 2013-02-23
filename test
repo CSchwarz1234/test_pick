@@ -1,0 +1,68 @@
+#christian schwarz 23.2.2013
+
+#info: fails cause there are some additional "'"-signs in test_program
+#  	fails cause there are some "<"-signs additional IN the elements of the list test_program
+#  	fails cause there are some values in the given data which are not in the 
+#  		programmed data cause it's programmed from an event file
+# point 1 and 2 can be eleminated by rewriting testdaten.txt
+# sort(), remove() and reverse() function has the result of a NoneType
+
+#import of neccesary tools
+from sys import argv
+script = argv
+
+#programmed data from testdaten.txt
+#given data from nlloc.hyp
+
+
+lines_program = open('testdaten.txt').read().lower().strip().splitlines()
+lines_given = open('nlloc.hyp').read().lower().strip().splitlines()
+
+
+program_data = str()
+for line in lines_program:
+  program_data = program_data + line +"\n"
+
+  
+#given data  
+lines_given = open('nlloc.hyp').read().lower().strip().splitlines()
+pick_block = str()
+in_pick_block = False
+for line in lines_given:
+  if line.startswith('phase'):
+  	in_pick_block = True
+  	
+  elif line.startswith('end_phase'):
+  	in_pick_block = False
+  	continue
+  	
+  if in_pick_block is True: 	
+  	pick_block = pick_block + line +"\n"
+
+  	
+# print type(program_data)
+# print type(pick_block)
+test_program = sorted(program_data.split())
+test_given = sorted(pick_block.split())
+#print test_program
+#print test_given
+print lines_program
+print lines_given
+
+
+
+import unittest
+  	
+  	
+class TestSequenceFunctions(unittest.TestCase):
+  def setUp(self):
+  	test_program = sorted(program_data.split())
+  	test_given = sorted(pick_block.split())
+
+  	
+  def test_equal(self):
+  	self.assertListEqual(test_program, test_given)
+  	
+  	
+if __name__=='__main__':  
+  	unittest.main()	
