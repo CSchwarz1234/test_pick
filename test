@@ -4,7 +4,7 @@
 #  	fails cause there are some "<"-signs additional IN the elements of the list test_program
 #  	fails cause there are some values in the given data which are not in the 
 #  		programmed data cause it's programmed from an event file
-# point 1 and 2 can be eleminated by rewriting testdaten.txt
+# point 1 and 2 can be eleminated by rewriting testdaten.txt => solved
 # sort(), remove() and reverse() function has the result of a NoneType
 
 #import of neccesary tools
