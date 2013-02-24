@@ -106,7 +106,7 @@ for arrival in origin.arrivals:
   dip_f = event.focal_mechanisms[0].nodal_planes.nodal_plane_1.dip
   dip = '%(dip_f)4.1f' %{"dip_f": dip_f}
   #RQual = Qualitaetsmerkmal a26
-  r_qual = 9 #default value??
+  r_qual = '9' #default value??
   #Tcorr = Zeitkorrektur a27
   time_correction = arrival.time_correction
   #get the rigth form of timecorrection
@@ -116,9 +116,14 @@ for arrival in origin.arrivals:
   
   #for output(arrival)
 
-  out = station_code ,a2, a3, a4, a5, wavetype, a7, date, time, seconds, a11, magnitude_error, a13, amp, \
-  a15, a16, time_residual, time_weight, station_location_x, station_location_y, station_location_z, \
-  distance, azimuth1, azimuth2, dip, r_qual, time_correction
+  # out = station_code + a2 + a3 + a4 + a5 + wavetype + a7 + date + time + seconds + a11 + magnitude_error + a13 + amp + \
+  # a15 + a16 + time_residual + time_weight + station_location_x + station_location_y + station_location_z + \
+  # distance + azimuth1 + azimuth2 + dip + r_qual + time_correction
+  out = "".join((station_code,' ',a2,' ',a3,' ',a4,' ',a5,' ',wavetype,' ',\
+  a7,' ',date,' ',time,' ',seconds,' ',a11,' ',magnitude_error,' ',a13,' ',\
+  amp,' ',a15,' ',a16,' ',time_residual,' ',time_weight,' ',station_location_x,\
+  ' ',station_location_y,' ',station_location_z,' ',distance,' ',azimuth1,' ',\
+  azimuth2,' ',dip,' ',r_qual,' ',time_correction))
   output = str(out)
   file.write(output) #error, type(out) is tuple
   file.write("\n")
