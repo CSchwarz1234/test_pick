@@ -1,130 +1,139 @@
-from obspy.core.event import readEvents
-cat = readEvents('c:\\Users\\bwmin\\Desktop\\HiWi\\event.xml')
-event = cat[0]
-origin = event.origins[0]
-pick = event.picks
+#eventfile = 'c:\\Users\\bwmin\\Desktop\\HiWi\\event.xml'
+#textfile = 'testdaten1.txt'
 
-from sys import argv
-script = argv
-file = open('testdaten.txt', "w")
-  	
-  
+def event_to_text(eventfile = 'c:\\Users\\bwmin\\Desktop\\HiWi\\event.xml', \
+  textfile = 'testdaten1.txt'):
+  """
+  Rewriting a given eventfile into an textfile
 
-# separation of the line hadn't worked with putting string in ()
-line1 = ('PHASE ID Ins Cmp On Pha FM Date HrMn Sec Err ErrMag Coda Amp Per > TTpred Res Weight StaLoc(X Y Z) SDist SAzim RAz RDip RQual Tcorr')
+  :type eventfile: str
+  :param eventfile: string containing a file name (*.xml)
+  :type textfile: str
+  :param textfile: string containing the filename e.g. (*.txt) as which you
+  want to save it. It will occur in the folder your program is placed
+  """
 
-file.write(line1)
-file.write("\n")
+  from obspy.core.event import readEvents
+  #with readEvents (eventfile) as cat:
+  cat = readEvents(eventfile)
+  event = cat[0]
+  origin = event.origins[0]
+  pick = event.picks
 
-n = 0 #number of pick to be referred to arrival
+  from sys import argv
+  script = argv
 
-for arrival in origin.arrivals:
-  #refer the picks to the arrivals to read them in one loop
-  arrival.pick_id.setReferredObject(pick[n])
-  n = n+1
-  
-  #station_code phase a1
-  station_code = arrival.pick_id.getReferredObject().waveform_id.station_code
-  #ID a2
-  a2 = '?'
-  #Ins a3
-  a3 = '?'
-  #Cmp a4
-  a4 = '?'
-  #On a5
-  a5 = '?'
-  #wavetype Pha a6
-  wavetype = arrival.phase
-  #FM a7
-  a7 = '?'
-  #year
-  year = arrival.pick_id.getReferredObject().time.year
-  #month
-  month = arrival.pick_id.getReferredObject().time.month
-  #day
-  day = arrival.pick_id.getReferredObject().time.day
-  #combine year, month and day to date in the format yyyymmdd a8
-  date = '%(year)04d%(month)02d%(day)02d' %{"year": year, "month": month, "day": day}
-  #hour 
-  hour = arrival.pick_id.getReferredObject().time.hour
-  #minute
-  minute = arrival.pick_id.getReferredObject().time.minute
-  #combine hour and minute to time in the format hhmm a9
-  time = '%(hour)02d%(minute)02d' %{"hour": hour, "minute": minute}
-  #second
-  second = arrival.pick_id.getReferredObject().time.second
-  #microsecond
-  microsecond = arrival.pick_id.getReferredObject().time.microsecond
-  #combine second and microsecond to seconds in the format ss.mmmmmm a10
-  seconds = '%(s)02d.%(ms)06d' %{"s": second, "ms": microsecond}
-  #kind of error a11
-  a11='GAU' #default
-  #Magnitudenfehler a12
-  magnitude_error_f = event.magnitudes[0].mag_errors.uncertainty
-  magnitude_error = '%(magnitude_error_f)0.2e' %{"magnitude_error_f": magnitude_error_f}
-  #coda a13
-  a13_f = -1
-  a13 ='%(a13_f)0.2e' %{"a13_f": a13_f}
-  #Amplitude a14
-  amplitude = event.amplitudes
-  # get the right form of amplitude
-  if not amplitude:
-  	amp_f = 0
-  amp = '%(amp_f)0.2e' %{"amp_f": amp_f}
-  #Per a15
-  a15_f = -1
-  a15 = '%(a15_f)0.2e' %{"a15_f": a15_f}
-  #TTpred a16
-  a16_f = 0
-  a16 = '%(a16_f)9.4f' %{"a16_f": a16_f}
-  #Time-residual a17
-  time_residual_f = arrival.time_residual
-  time_residual = '%(time_residual_f)6.4f' %{"time_residual_f": time_residual_f}
-  #Time-weight a18
-  time_weight_f = arrival.time_weight
-  time_weight = '%(time_weight_f)6.4f' %{"time_weight_f": time_weight_f}
-  #StaLoc = Stationsposotion; X a19
-  station_location_x_f = 0
-  station_location_x = '%(station_location_x_f)9.4f' %{"station_location_x_f": station_location_x_f}
-  #StaLoc = Stationsposotion; Y a20
-  station_location_y_f = 0
-  station_location_y = '%(station_location_y_f)9.4f' %{"station_location_y_f": station_location_y_f}
-  #StaLoc = Stationsposotion; Z a21
-  station_location_z_f = 0
-  station_location_z = '%(station_location_z_f)9.4f' %{"station_location_z_f": station_location_z_f}
-  #SDist=Entfernung a22
-  distance_f = arrival.distance
-  distance = '%(distance_f)6.4f' %{"distance_f": distance_f}
-  #there's only one azimuth value in the catalogue, so the same as RAz
-  #SAzim = Azimuthwinkel a23
-  azimuth1_f = arrival.azimuth
-  azimuth1 = '%(azimuth1_f)6.2f' %{"azimuth1_f": azimuth1_f}
-  #RAz = Azimuthwinkel a24
-  azimuth2_f = arrival.azimuth
-  azimuth2 = '%(azimuth2_f)6.2f' %{"azimuth2_f": azimuth2_f}
-  #RDip= Einfallen a25
-  dip_f = event.focal_mechanisms[0].nodal_planes.nodal_plane_1.dip
-  dip = '%(dip_f)4.1f' %{"dip_f": dip_f}
-  #RQual = Qualitaetsmerkmal a26
-  r_qual = '9' #default value??
-  #Tcorr = Zeitkorrektur a27
-  time_correction = arrival.time_correction
-  #get the rigth form of timecorrection
-  if time_correction is None:
-  	time_correction_f = 0
-  time_correction = '%(time_correction_f)6.4f' %{"time_correction_f": time_correction_f}
-  
-  #for output(arrival)
+  with open (textfile, "w") as file:
+  	line1 = ('PHASE ID Ins Cmp On Pha FM Date HrMn Sec Err ErrMag Coda'\
+  	'Amp Per > TTpred Res Weight StaLoc(X Y Z) SDist SAzim RAz RDip RQual'\
+  	'Tcorr')
 
-  # out = station_code + a2 + a3 + a4 + a5 + wavetype + a7 + date + time + seconds + a11 + magnitude_error + a13 + amp + \
-  # a15 + a16 + time_residual + time_weight + station_location_x + station_location_y + station_location_z + \
-  # distance + azimuth1 + azimuth2 + dip + r_qual + time_correction
-  out = "".join((station_code,' ',a2,' ',a3,' ',a4,' ',a5,' ',wavetype,' ',\
-  a7,' ',date,' ',time,' ',seconds,' ',a11,' ',magnitude_error,' ',a13,' ',\
-  amp,' ',a15,' ',a16,' ',time_residual,' ',time_weight,' ',station_location_x,\
-  ' ',station_location_y,' ',station_location_z,' ',distance,' ',azimuth1,' ',\
-  azimuth2,' ',dip,' ',r_qual,' ',time_correction))
-  output = str(out)
-  file.write(output) #error, type(out) is tuple
-  file.write("\n")
-file.close()
+  	file.write(line1)
+  	file.write("\n")
+
+  	n = 0 #number of pick to be referred to arrival
+
+  	for arrival in origin.arrivals:
+  		#refer the picks to the arrivals to read them in one loop
+  		arrival.pick_id.setReferredObject(pick[n])
+  		n = n+1
+  		
+  		#station_code phase a1
+  		station_code = arrival.pick_id.getReferredObject().\
+  		waveform_id.station_code
+  		#ID a2
+  		a2 = '?'
+  		#Ins a3
+  		a3 = '?'
+  		#Cmp a4
+  		a4 = '?'
+  		#On a5
+  		a5 = '?'
+  		#wavetype Pha a6
+  		wavetype = arrival.phase
+  		#FM a7
+  		a7 = '?'
+  		# date; get year, month and day and combine them to yyyymmdd a8
+  		date = '%(year)04d%(month)02d%(day)02d' \
+  		%{"year": arrival.pick_id.getReferredObject().time.year, \
+  		"month": arrival.pick_id.getReferredObject().time.month, \
+  		"day": arrival.pick_id.getReferredObject().time.day}
+  		#time; get hour and minute and combine them to hhmm a9
+  		time = '%(hour)02d%(minute)02d' \
+  		%{"hour": arrival.pick_id.getReferredObject().time.hour, \
+  		"minute": arrival.pick_id.getReferredObject().time.minute}
+  		#seconds; get second and micsecond and combine them to ss.mmmm a10
+  		seconds = '%(sec_f)7.4f' %{"sec_f": float('%(s)02d.%(ms)04d'\
+  		%{"s": arrival.pick_id.getReferredObject().time.second, \
+  		"ms": arrival.pick_id.getReferredObject().time.microsecond})}
+  		#kind of error a11
+  		a11='GAU' #default
+  		#Magnitudenfehler a12
+  		magnitude_error = '%(magnitude_error_f)0.2e' \
+  		%{"magnitude_error_f": event.magnitudes[0].mag_errors.uncertainty}
+  		#coda a13
+  		a13_f = -1
+  		a13 ='%(a13_f)0.2e' %{"a13_f": a13_f}
+  		#Amplitude a14
+  		amplitude = event.amplitudes
+  		# get the right form of amplitude
+  		if not amplitude:
+  			amp_f = -1
+  		amp = '%(amp_f)0.2e' %{"amp_f": amp_f}
+  		#Per a15
+  		a15_f = -1
+  		a15 = '%(a15_f)0.2e' %{"a15_f": a15_f}
+  		#TTpred a16
+  		a16_f = 0
+  		a16 = '%(a16_f)6.4f' %{"a16_f": a16_f}
+  		#Time-residual a17
+  		time_residual = '%(time_residual_f)6.4f' \
+  		%{"time_residual_f": arrival.time_residual}
+  		#Time-weight a18
+  		time_weight = '%(time_weight_f)6.4f' \
+  		%{"time_weight_f": arrival.time_weight}
+  		#StaLoc = Stationsposotion; X a19
+  		station_location_x_f = 0
+  		station_location_x = '%(station_location_x_f)9.4f' \
+  		%{"station_location_x_f": station_location_x_f}
+  		#StaLoc = Stationsposotion; Y a20
+  		station_location_y_f = 0
+  		station_location_y = '%(station_location_y_f)9.4f' \
+  		%{"station_location_y_f": station_location_y_f}
+  		#StaLoc = Stationsposotion; Z a21
+  		station_location_z_f = 0
+  		station_location_z = '%(station_location_z_f)9.4f' \
+  		%{"station_location_z_f": station_location_z_f}
+  		#SDist=Entfernung a22
+  		distance = '%(distance_f)6.4f' %{"distance_f": arrival.distance}
+  		#there's one azimuth value in the catalogue, so the same as RAz
+  		#SAzim = Azimuthwinkel a23
+  		azimuth1 = '%(azimuth1_f)6.2f' %{"azimuth1_f": arrival.azimuth}
+  		#RAz = Azimuthwinkel a24
+  		azimuth2 = '%(azimuth2_f)5.1f' %{"azimuth2_f": arrival.azimuth}
+  		#RDip= Einfallen a25
+  		dip = '%(dip_f)4.1f' %{"dip_f": \
+  		event.focal_mechanisms[0].nodal_planes.nodal_plane_1.dip}
+  		#RQual = Qualitaetsmerkmal a26
+  		r_qual = '9' #default value??
+  		#Tcorr = Zeitkorrektur a27
+  		time_correction = arrival.time_correction
+  		#get the rigth form of timecorrection
+  		if time_correction is None:
+  			time_correction_f = 0
+  		time_correction = '%(time_correction_f)6.4f' \
+  		%{"time_correction_f": time_correction_f}
+  		
+  		# define the output
+  		out = "".join((station_code,' ',a2,' ',a3,' ',a4,' ',a5,' ',\
+  		wavetype,' ',a7,' ',date,' ',time,' ',seconds,' ',a11,' ',\
+  		magnitude_error,' ',a13,' ',amp,' ',a15,' ','>',' ',a16,' ',\
+  		time_residual,' ',time_weight,' ',station_location_x,' ',\
+  		station_location_y,' ',station_location_z,' ',distance,' ',\
+  		azimuth1,' ',azimuth2,' ',dip,' ',r_qual,' ',time_correction))
+  		output = str(out)
+  		file.write(output) 
+  		file.write("\n")
+  		
+
+event_to_text('c:\\Users\\bwmin\\Desktop\\HiWi\\event.xml', 'testdaten1.txt')
