@@ -1,4 +1,3 @@
-
 from obspy.core.event import Catalog
 from obspy.core.event import Event
 from obspy.core.event import Origin
@@ -6,88 +5,89 @@ from obspy.core.event import Pick
 from obspy.core.event import Magnitude
 from obspy.core.event import *
 
-#define the catalog structure
-cat = Catalog()
-event = Event()
-event.resource_id = ResourceIdentifier()
-event.creation_info = CreationInfo()
-picks = Pick()
-focal_mechanism = FocalMechanism()
-focal_mechanism.resource_id = ResourceIdentifier()
-focal_mechanism.triggering_origin_id = ResourceIdentifier()
-focal_mechanism.nodal_plane = NodalPlanes()
-focal_mechanism.station_polarity_count = 999
-focal_mechanism.method_id = ResourceIdentifier()
-origin = Origin()
-origin.resid = ResourceIdentifier()
-origin.time = UTCDateTime()
-origin.quality = OriginQuality()
-origin.uncertainty = OriginUncertainty()
-arrival = Arrival()
-magnitudes = Magnitude()
-magnitudes.resource_id = ResourceIdentifier()
-magnitudes.mag = 9999
-magnitudes.magnitude_type = '?'
-magnitudes.method_id = ResourceIdentifier()
 
-#read file
-from sys import argv
-script, filename = argv
-file = open(filename)
-abc = file.read()
-#split file
-lines = abc.lower().strip().splitlines()
-in_pick_block = False
-for line in lines:
-  if line.startswith('phase'):
-  	in_pick_block = True
-  	continue
-  elif line.startswith('end_phase'):
-  	in_pick_block = False
-  	continue
-  	
-  if in_pick_block is True: 	
-  	#now loop is running over all lines, not just picks and definition of the pick content
-  	pick = line.split()
+def text_to_event(textfile='nlloc.hyp'):
+    """
+    rewriting a textdocument with given form into an event file
 
-  	#create a new arrival
-  	origin.arrivals.append(arrival)
-  	#write informations in the arrival specific part of the event
-  	arrival.resource_id = ResourceIdentifier()
-  	arrival.pick_id = ResourceIdentifier()
-  	arrival.phase = pick[4]
-  	arrival.azimuth = float(pick[22])
-  	arrival.distance = float(pick[21])
-  	arrival.time_residual = float(pick[16])
-  	arrival.time_weight = float(pick[17])
-  	#print arrival
+    :type textfile: str
+    :param textfile: String containing the filename/path
+    :return: a catalog object with name 'cat'
+    """
 
-  	#create a new pick
-  	picks = Pick()
-  	#write inforamtions in the pick specific part of the event
-  	picks.resource_id = ResourceIdentifier()
-  	#create time part
-  	picks.time = UTCDateTime()
-  	#write timeinformations
-  	year = pick[6][0:4]
-  	month = pick[6][4:6]
-  	day = pick[6][6:8]
-  	hour = pick[7][0:2]
-  	minute = pick[7][2:4]
-  	second = pick[8][0:2]
-  	microsecond = pick[8][3:7]
-  	time_raw = [year, month, day, hour, minute, second, microsecond]
-  	time_raw2 = map(int, time_raw)
-  	time = UTCDateTime(time_raw2[0],time_raw2[1],time_raw2[2],time_raw2[3],time_raw2[4],time_raw2[5],time_raw2[6])
-  	#time = UTCDateTime(time_raw2)
-  	#create Waveform part
-  	picks.waveform_id =WaveformStreamID()
-  	#write waveforminformations
-  	picks.waveform_id.network_code = '?'
-  	picks.waveform_id.station_code = pick[0]
-  	picks.waveform_id.channel_code = '?'
-  	picks.phase_hint = pick[4]
-  	
-  	#print picks
-  
-file.close()
+    #define the catalog structure
+    cat = Catalog()
+
+    event = Event()
+    event.resource_id = ResourceIdentifier()
+    event.creation_info = CreationInfo()
+
+    picks = Pick()
+
+    focal_mechanism = FocalMechanism()
+    focal_mechanism.resource_id = ResourceIdentifier()
+    focal_mechanism.triggering_origin_id = ResourceIdentifier()
+    focal_mechanism.nodal_plane = NodalPlanes()
+    focal_mechanism.station_polarity_count = 9999
+    focal_mechanism.method_id = ResourceIdentifier()
+
+    origin = Origin()
+    origin.resid = ResourceIdentifier()
+    origin.time = UTCDateTime()
+    origin.quality = OriginQuality()
+    origin.uncertainty = OriginUncertainty()
+    arrival = Arrival()
+
+    magnitudes = Magnitude()
+    magnitudes.resource_id = ResourceIdentifier()
+    magnitudes.mag = 9999
+    magnitudes.magnitude_type = '?'
+    magnitudes.method_id = ResourceIdentifier()
+
+    #read file
+    with open(textfile) as file:
+        #split file
+        lines = file.read().lower().strip().splitlines()
+        in_pick_block = False
+        for line in lines:
+            if line.startswith('phase'):
+                in_pick_block = True
+                continue
+            elif line.startswith('end_phase'):
+                in_pick_block = False
+                continue
+
+            if in_pick_block is True:
+                pick = line.split()
+
+                #create a new arrival
+                origin.arrivals.append(arrival)
+                #write informations in the arrival specific part of the event
+                arrival.resource_id = ResourceIdentifier()
+                arrival.pick_id = ResourceIdentifier()
+                arrival.phase = pick[4]
+                arrival.azimuth = float(pick[22])
+                arrival.distance = float(pick[21])
+                arrival.time_residual = float(pick[16])
+                arrival.time_weight = float(pick[17])
+
+                #create a new pick
+                picks = Pick()
+                #write inforamtions in the pick specific part of the event
+                picks.resource_id = ResourceIdentifier()
+                #create time part
+                picks.time = UTCDateTime()
+                #write timeinformations
+                time_raw2 = map(int, [pick[6][0:4], pick[6][4:6], pick[6][6:8],
+                pick[7][0:2], pick[7][2:4], pick[8][0:2], pick[8][3:7]])
+                time = UTCDateTime(time_raw2[0], time_raw2[1], time_raw2[2],
+                time_raw2[3], time_raw2[4], time_raw2[5], time_raw2[6])
+                #create Waveform part
+                picks.waveform_id = WaveformStreamID()
+                #write waveforminformations
+                picks.waveform_id.network_code = '?'
+                picks.waveform_id.station_code = pick[0]
+                picks.waveform_id.channel_code = '?'
+                picks.phase_hint = pick[4]
+
+text_to_event('nlloc.hyp')
